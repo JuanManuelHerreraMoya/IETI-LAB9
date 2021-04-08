@@ -2,17 +2,30 @@ package eci.ieti;
 
 import eci.ieti.data.CustomerRepository;
 import eci.ieti.data.ProductRepository;
+import eci.ieti.data.TodoRepository;
+import eci.ieti.data.UserRepository;
 import eci.ieti.data.model.Customer;
 import eci.ieti.data.model.Product;
 
+import eci.ieti.data.model.Todo;
+import eci.ieti.data.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+
+import java.util.Date;
 
 @SpringBootApplication
 public class Application implements CommandLineRunner {
+
+
 
 
     @Autowired
@@ -20,16 +33,37 @@ public class Application implements CommandLineRunner {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TodoRepository todoRepository;
     
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }
 
+
+
+
     @Override
     public void run(String... args) throws Exception {
 
-        customerRepository.deleteAll();
+        ApplicationContext applicationContext = new AnnotationConfigApplicationContext(AppConfiguration.class);
+        MongoOperations mongoOperation = (MongoOperations) applicationContext.getBean("mongoTemplate");
 
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("firstName").is("Alice"));
+        Customer customer = mongoOperation.findOne(query, Customer.class);
+        System.out.println(customer);
+
+
+        System.out.println("--------------ARRIBA TONTO---------------");
+
+
+        customerRepository.deleteAll();
         customerRepository.save(new Customer("Alice", "Smith"));
         customerRepository.save(new Customer("Bob", "Marley"));
         customerRepository.save(new Customer("Jimmy", "Page"));
@@ -61,6 +95,36 @@ public class Application implements CommandLineRunner {
         	.forEach(System.out::println);
    
         System.out.println();
+        System.out.println("------------------------------------------- ENTRE USER ------------------------------");
+
+        userRepository.deleteAll();
+
+        userRepository.save(new User(1L,"Juan Herrera","juan@gmail.com"));
+        userRepository.save(new User(2L,"David Herrera","david@gmail.com"));
+        userRepository.save(new User(3L,"Mao Herrera","mao@gmail.com"));
+        userRepository.save(new User(4L,"Sandra Herrera","Sandra@gmail.com"));
+
+
+        userRepository.findAll().stream()
+                .forEach(System.out::println);
+
+
+
+        System.out.println("------------------------------------------- ENTRE 2 ------------------------------");
+
+        todoRepository.deleteAll();
+
+
+
+        todoRepository.save(new Todo(1L,"Prueba 1",1,new Date(),"juan@gmail.com","pending"));
+        todoRepository.save(new Todo(2L,"Prueba 2",1,new Date(),"juan@gmail.com","pending"));
+        todoRepository.save(new Todo(3L,"Prueba 3",1,new Date(),"juan@gmail.com","pending"));
+        todoRepository.save(new Todo(4L,"Prueba 4",1,new Date(),"juan@gmail.com","pending"));
+
+        todoRepository.findByResponsible("juan@gmail.com", PageRequest.of(0, 2)).stream()
+                .forEach(System.out::println);
+
+
     }
 
 }

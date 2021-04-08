@@ -1,0 +1,4 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://admin:admin@ieti-lab9.1kuce.mongodb.net/IETI-LAB9?retryWrites=true&w=majority
